@@ -104,10 +104,30 @@ npm run migrate
 - Esquemas de validación con Zod
 - Middleware de validación
 - Esquemas para auth y users
+- CRUD de tareas relacionadas con usuarios (Prisma + Zod)
+
+**Endpoints de tareas:**
+- `GET /api/tasks` - Listar tareas
+- `GET /api/tasks/:id` - Obtener una tarea
+- `POST /api/tasks` - Crear una tarea
+- `PATCH /api/tasks/:id` - Actualizar una tarea
+- `DELETE /api/tasks/:id` - Eliminar una tarea
+
+Prepara PostgreSQL, aplica las migraciones y crea el usuario de prueba con ID `1`:
+```bash
+npm install
+cp .env.example .env
+docker compose up -d
+npm run db:setup
+npm run dev
+```
+
+`npm run db:setup` es seguro repetirlo: aplica las migraciones pendientes y crea el usuario de prueba solo si el ID `1` todavía no existe.
 
 **Archivos principales:**
 - `src/middleware/validate.ts`
 - `src/modules/users/users.schema.ts`
+- `src/modules/tasks/`
 
 ---
 
@@ -242,4 +262,3 @@ Cada versión incluye su propio README con detalles específicos de implementaci
 ## 📝 Notas
 
 Este proyecto está diseñado con propósitos educativos para aprender desarrollo de APIs REST paso a paso.
-

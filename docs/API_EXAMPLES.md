@@ -1,5 +1,19 @@
 # Ejemplos de uso de la API
 
+## Preparar el entorno
+
+Desde la raíz del proyecto, crea la configuración local, inicia PostgreSQL, aplica las migraciones y crea el usuario de prueba con ID `1`:
+
+```bash
+npm install
+cp .env.example .env
+docker compose up -d
+npm run db:setup
+npm run dev
+```
+
+Deja `npm run dev` ejecutándose en esa terminal. En otra terminal, ejecuta los ejemplos siguientes. `db:setup` se puede repetir sin duplicar el usuario de prueba.
+
 ## Endpoints disponibles
 
 ### Health Check
@@ -36,6 +50,70 @@ curl -X PATCH http://localhost:3000/api/users/1 \
 ### Eliminar usuario
 ```bash
 curl -X DELETE http://localhost:3000/api/users/1
+```
+
+---
+
+## Tasks
+
+Las tareas pertenecen a un usuario. Al eliminar un usuario, PostgreSQL elimina también sus tareas.
+
+### Crear una tarea
+```bash
+curl -X POST http://localhost:3000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Comprar pan","description":"Pan integral","userId":1}'
+```
+
+En una base de datos recién creada, la primera tarea recibe el ID `1`, usado en los ejemplos siguientes. Si la base ya se utilizó, usa el `id` que devuelve el `POST` en las rutas siguientes.
+
+### Listar tareas
+```bash
+curl http://localhost:3000/api/tasks
+```
+
+### Obtener una tarea
+```bash
+curl http://localhost:3000/api/tasks/1
+```
+
+### Actualizar una tarea
+```bash
+curl -X PATCH http://localhost:3000/api/tasks/1 \
+  -H "Content-Type: application/json" \
+  -d '{"done":true}'
+```
+
+### Eliminar una tarea
+```bash
+curl -X DELETE http://localhost:3000/api/tasks/1
+```
+
+### Comprobar respuestas de error
+
+```bash
+# 400: falta el título (validación Zod)
+curl -i -X POST http://localhost:3000/api/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"userId":1}'
+
+# 400: título de menos de 3 caracteres (validación Zod)
+curl -i -X POST http://localhost:3000/api/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"ab","userId":1}'
+
+# 400: userId inexistente (clave foránea)
+curl -i -X POST http://localhost:3000/api/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Comprar pan","userId":999}'
+
+# 404: tarea inexistente
+curl -i -X PATCH http://localhost:3000/api/tasks/9999 \
+  -H 'Content-Type: application/json' \
+  -d '{"done":true}'
+
+# 400: ID no numérico
+curl -i http://localhost:3000/api/tasks/abc
 ```
 
 ---
@@ -124,4 +202,3 @@ En versiones futuras se añadirán:
 - `POST /api/auth/login` - Login con JWT
 - `GET /api/users/me` - Perfil del usuario autenticado
 - Rutas protegidas con JWT
-
